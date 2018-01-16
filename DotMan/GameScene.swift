@@ -28,6 +28,37 @@ func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
     }
 #endif
 
+func randomInt(min: Int, max:Int) -> Int {
+    return min + Int(arc4random_uniform(UInt32(max - min + 1)))
+}
+
+func random() -> CGFloat {
+    return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+}
+
+
+func random(min: CGFloat, max: CGFloat) -> CGFloat {
+    return random() * (max - min) + min
+}
+
+func randomNumber(probabilities: [Double]) -> Int {
+    
+    // Sum of all probabilities (so that we don't have to require that the sum is 1.0):
+    let sum = probabilities.reduce(0, +)
+    // Random number in the range 0.0 <= rnd < sum :
+    let rnd = sum * Double(arc4random_uniform(UInt32.max)) / Double(UInt32.max)
+    // Find the first interval of accumulated probabilities into which `rnd` falls:
+    var accum = 0.0
+    for (i, p) in probabilities.enumerated() {
+        accum += p
+        if rnd < accum {
+            return i
+        }
+    }
+    // This point might be reached due to floating point inaccuracies:
+    return (probabilities.count - 1)
+}
+
 extension CGPoint {
     func length() -> CGFloat {
         return sqrt(x*x + y*y)
@@ -47,6 +78,8 @@ struct PhysicsCategory {
     static let blade: UInt32 = 0b1 << 2    // 3
     static let region_hero: UInt32 = 0b1 << 3      //4
     static let world: UInt32 = 0b1 << 4        //5
+    static let enemy: UInt32 = 0b1 << 5         //6
+    static let enemy_detect: UInt32 = 0b1 << 6   //7
 }
 
 enum action{
@@ -57,7 +90,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     let hero = SKSpriteNode(imageNamed: "ship_hero")
-    let enemy = SKSpriteNode(imageNamed: "ship_enemy")
+    //let enemy = SKSpriteNode(imageNamed: "ship_enemy")
+    //let enemy_detect = SKSpriteNode(imageNamed: "enemy_detect")
+    
     
     let move_base = SKSpriteNode(imageNamed: "base")
     let move_stick = SKSpriteNode(imageNamed: "stick")
@@ -73,19 +108,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let archer = SKSpriteNode(imageNamed: "archer")
     let blade = SKSpriteNode(imageNamed: "blade")
     
+    //let archer_enemy  = SKSpriteNode(imageNamed: "archer_enemy")
+
+    
     var moveActive:Bool = false
     var attActive:Bool = false
     
     var selectBladeNow:Bool = false
+    
+    
+    //var enemyArcherActive:Bool = false
+    //var enemyBladeActive:Bool = false
+    
+    //var enemyArcherCount = 0
+    //var enemyArcherRandom: Int?
     
     var validMove:UITouch?
     var validAtt:UITouch?
     
     var arrayArrow :[SKSpriteNode] = [SKSpriteNode]()
     
+    var arrayRegion :[SKSpriteNode] = [SKSpriteNode]()
+    
     var framecount = 0
     
-    var actionList = Array(repeating: 0.333, count: 3)
+    //var actionList = Array(repeating: 0.333, count: 3)
     
     
     override func didMove(to view: SKView) {
@@ -100,11 +147,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //Initial position of hero
         hero.position = CGPoint(x: size.width * 0.1, y: size.height * 0.5)
         
-        enemy.position = CGPoint(x:size.width*0.9, y:size.height*0.5)
+        //enemy.position = CGPoint(x:size.width*0.9, y:size.height*0.5)
+        //enemy_detect.position = enemy.position
+        //enemy_detect.zPosition = -0.9
         
         //add to screen
         addChild(hero)
-        addChild(enemy)
+        //addChild(enemy)
+        //addChild(enemy_detect)
+        
+        //gameAI()
         
         //movement stick initialization
         move_base.position = CGPoint(x: size.width * 0.1, y: size.height * 0.15)
@@ -150,8 +202,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         hero.physicsBody!.categoryBitMask = PhysicsCategory.hero
         hero.physicsBody!.contactTestBitMask = PhysicsCategory.region_hero | PhysicsCategory.blade
         hero.physicsBody!.collisionBitMask = PhysicsCategory.world
-                
+        
+        
+        run(SKAction.repeatForever(
+            SKAction.sequence([
+                SKAction.run(addEnemy),
+                SKAction.wait(forDuration: 1.0)
+                ])
+        ))
+        
+        let backgroundMusic = SKAudioNode(fileNamed: "background_music.mp3")
+        backgroundMusic.autoplayLooped = true
+        addChild(backgroundMusic)
+        
     }
+    
+    func addEnemy() {
+        
+        let enemy = SKSpriteNode(imageNamed: "ship_enemy")
+        
+        // Determine where to spawn the monster along the Y axis
+        let actualY = random(min: enemy.size.height/2, max: size.height - enemy.size.height/2)
+        
+        // Position the monster slightly off-screen along the right edge,
+        // and along a random position along the Y axis as calculated above
+        enemy.position = CGPoint(x: size.width + enemy.size.width/2, y: actualY)
+        
+        // Add the monster to the scene
+        addChild(enemy)
+        
+        // Determine speed of the monster
+        let actualDuration = random(min: CGFloat(2.0), max: CGFloat(4.0))
+        
+        // Create the actions
+        let actionMove = SKAction.move(to: CGPoint(x: -enemy.size.width/2, y: actualY), duration: TimeInterval(actualDuration))
+        let actionMoveDone = SKAction.removeFromParent()
+        enemy.run(SKAction.sequence([actionMove, actionMoveDone]))
+        
+    }
+    
+    
+    /*func gameAI(){
+        print ("here")
+        //let act = randomNumber(probabilities: actionList)
+        //if(act == 2){
+            archer_action()
+        //}
+    }*/
     
     override func update(_ currentTime: TimeInterval) {
         framecount += 1
@@ -193,7 +290,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 archer.zRotation = angle - 1.57079633
                 hero.zRotation = archer.zRotation
             }
+            
+            
         }
+        
+        /*if(enemyArcherActive){
+            enemyArcherCount += 1
+            archer_enemy.position = enemy.position
+            let v = CGVector(dx: hero.position.x - enemy.position.x, dy: hero.position.y - enemy.position.y)
+            let angle = atan2(v.dy, v.dx)
+            archer_enemy.zRotation = angle - 1.57079633
+            if(enemyArcherCount == enemyArcherRandom){
+                archer_enemy.removeFromParent()
+                enemyArcherCount = 0
+                enemyArcherActive = false
+                gameAI()
+            }
+        }*/
+        
+        
         
         arrayArrow = arrayArrow.filter {$0.position.x < self.size.width && $0.position.x > 0 && $0.position.y > 0 && $0.position.y < self.size.height}
         //print(arrayArrow.count)
@@ -201,6 +316,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             for i in 0..<arrayArrow.count{
                 let region_hero = SKSpriteNode(imageNamed: "region")
                 region_hero.position = arrayArrow[i].position
+                arrayRegion.append(region_hero)
                 addChild(region_hero)
                 region_hero.physicsBody = SKPhysicsBody(circleOfRadius: region_hero.size.width/2)
                 //region_hero.physicsBody?.isDynamic = true
@@ -214,9 +330,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func gameAI(){
-        
-    }
     
     func movementDetect(_ location: CGPoint){
         if(moveActive){
@@ -253,17 +366,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    /*func waveBlade(){
-        print("here")
-        let blade_rotate = SKSpriteNode(imageNamed: "blade")
-        blade_rotate.position = blade.position
-        blade_rotate.zRotation = blade.zRotation-0.7
-        blade_rotate.anchorPoint = hero.position
-        blade.removeFromParent()
-        addChild(blade_rotate)
-        let rotate = SKAction.rotate(toAngle: blade.zRotation + 1.5, duration: 2)
-        blade_rotate.run(rotate)
+    /*func archer_action(){
+        print("here2")
+        enemyArcherActive = true
+        addChild(archer_enemy)
+        enemyArcherRandom = randomInt(min: 10, max: 50)
     }*/
+    
     
     func shootOut(){
         let arrow = SKSpriteNode(imageNamed: "archer")

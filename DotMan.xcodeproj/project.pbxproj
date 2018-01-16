@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C004D55200D8D25008DF11B /* background_music.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5C004D54200D8D25008DF11B /* background_music.mp3 */; };
 		5C8A983420031F6A00FF818F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8A983320031F6A00FF818F /* AppDelegate.swift */; };
 		5C8A983A20031F6A00FF818F /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8A983920031F6A00FF818F /* GameScene.swift */; };
 		5C8A983C20031F6A00FF818F /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8A983B20031F6A00FF818F /* GameViewController.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5C004D54200D8D25008DF11B /* background_music.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = background_music.mp3; sourceTree = "<group>"; };
 		5C8A983020031F6A00FF818F /* DotMan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DotMan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C8A983320031F6A00FF818F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5C8A983920031F6A00FF818F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -37,6 +39,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5C004D53200D8D25008DF11B /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				5C004D54200D8D25008DF11B /* background_music.mp3 */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
 		5C8A982720031F6A00FF818F = {
 			isa = PBXGroup;
 			children = (
@@ -58,6 +68,7 @@
 			children = (
 				5C8A983320031F6A00FF818F /* AppDelegate.swift */,
 				5C8A983920031F6A00FF818F /* GameScene.swift */,
+				5C004D53200D8D25008DF11B /* Sounds */,
 				5C8A983B20031F6A00FF818F /* GameViewController.swift */,
 				5C8A983D20031F6A00FF818F /* Main.storyboard */,
 				5C8A984B2003250100FF818F /* Assets.xcassets */,
@@ -128,6 +139,7 @@
 			files = (
 				5C8A983F20031F6A00FF818F /* Main.storyboard in Resources */,
 				5C8A984C2003250100FF818F /* Assets.xcassets in Resources */,
+				5C004D55200D8D25008DF11B /* background_music.mp3 in Resources */,
 				5C8A984420031F6A00FF818F /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
