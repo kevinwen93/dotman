@@ -220,22 +220,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func addEnemy() {
         
         let enemy = SKSpriteNode(imageNamed: "ship_enemy")
-        
-        // Determine where to spawn the monster along the Y axis
         let actualY = random(min: enemy.size.height/2, max: size.height - enemy.size.height/2)
-        
-        // Position the monster slightly off-screen along the right edge,
-        // and along a random position along the Y axis as calculated above
         enemy.position = CGPoint(x: size.width + enemy.size.width/2, y: actualY)
         
-        // Add the monster to the scene
         addChild(enemy)
-        
-        // Determine speed of the monster
-        let actualDuration = random(min: CGFloat(2.0), max: CGFloat(4.0))
-        
-        // Create the actions
-        let actionMove = SKAction.move(to: CGPoint(x: -enemy.size.width/2, y: actualY), duration: TimeInterval(actualDuration))
+        let actualDuration = random(min: CGFloat(1.0), max: CGFloat(3.0))
+        let actionMove = SKAction.move(to: CGPoint(x: -enemy.size.width/2, y: hero.position.y), duration: TimeInterval(actualDuration))
+        //let actionMove = SKAction.moveBy(x: 10, y: actualY - hero.position.y ,duration: TimeInterval(actualDuration))
         let actionMoveDone = SKAction.removeFromParent()
         enemy.run(SKAction.sequence([actionMove, actionMoveDone]))
         
@@ -307,8 +298,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 gameAI()
             }
         }*/
-        
-        
         
         arrayArrow = arrayArrow.filter {$0.position.x < self.size.width && $0.position.x > 0 && $0.position.y > 0 && $0.position.y < self.size.height}
         //print(arrayArrow.count)
@@ -405,8 +394,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             firstBody = contact.bodyB
             secondBody = contact.bodyA
         }
-        //print(contact.bodyA.categoryBitMask, contact.bodyB.categoryBitMask)
-        print(firstBody.categoryBitMask, secondBody.categoryBitMask)
         if(firstBody.categoryBitMask == PhysicsCategory.blade && secondBody.categoryBitMask == PhysicsCategory.region_hero){
             if let blade = firstBody.node as? SKSpriteNode, let
                 region = secondBody.node as? SKSpriteNode {
