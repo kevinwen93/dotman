@@ -18,7 +18,7 @@
 
 /* Begin PBXFileReference section */
 		5C004D54200D8D25008DF11B /* background_music.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = background_music.mp3; sourceTree = "<group>"; };
-		5C8A983020031F6A00FF818F /* DotMan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DotMan.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C8A983020031F6A00FF818F /* space_battleground.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = space_battleground.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C8A983320031F6A00FF818F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5C8A983920031F6A00FF818F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		5C8A983B20031F6A00FF818F /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -58,7 +58,7 @@
 		5C8A983120031F6A00FF818F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5C8A983020031F6A00FF818F /* DotMan.app */,
+				5C8A983020031F6A00FF818F /* space_battleground.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -81,9 +81,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5C8A982F20031F6A00FF818F /* DotMan */ = {
+		5C8A982F20031F6A00FF818F /* space_battleground */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5C8A984820031F6A00FF818F /* Build configuration list for PBXNativeTarget "DotMan" */;
+			buildConfigurationList = 5C8A984820031F6A00FF818F /* Build configuration list for PBXNativeTarget "space_battleground" */;
 			buildPhases = (
 				5C8A982C20031F6A00FF818F /* Sources */,
 				5C8A982D20031F6A00FF818F /* Frameworks */,
@@ -93,9 +93,9 @@
 			);
 			dependencies = (
 			);
-			name = DotMan;
+			name = space_battleground;
 			productName = DotMan;
-			productReference = 5C8A983020031F6A00FF818F /* DotMan.app */;
+			productReference = 5C8A983020031F6A00FF818F /* space_battleground.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -114,7 +114,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5C8A982B20031F6A00FF818F /* Build configuration list for PBXProject "DotMan" */;
+			buildConfigurationList = 5C8A982B20031F6A00FF818F /* Build configuration list for PBXProject "space_battleground" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -127,7 +127,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5C8A982F20031F6A00FF818F /* DotMan */,
+				5C8A982F20031F6A00FF818F /* space_battleground */,
 			);
 		};
 /* End PBXProject section */
@@ -294,7 +294,7 @@
 				DEVELOPMENT_TEAM = 9JLRXU8SLH;
 				INFOPLIST_FILE = DotMan/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.exapmle.DotMan;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.exapmle.space-battleground";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -309,7 +309,7 @@
 				DEVELOPMENT_TEAM = 9JLRXU8SLH;
 				INFOPLIST_FILE = DotMan/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.exapmle.DotMan;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.exapmle.space-battleground";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -319,7 +319,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5C8A982B20031F6A00FF818F /* Build configuration list for PBXProject "DotMan" */ = {
+		5C8A982B20031F6A00FF818F /* Build configuration list for PBXProject "space_battleground" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5C8A984620031F6A00FF818F /* Debug */,
@@ -328,7 +328,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5C8A984820031F6A00FF818F /* Build configuration list for PBXNativeTarget "DotMan" */ = {
+		5C8A984820031F6A00FF818F /* Build configuration list for PBXNativeTarget "space_battleground" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5C8A984920031F6A00FF818F /* Debug */,
