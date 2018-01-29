@@ -79,7 +79,7 @@ struct PhysicsCategory {
     static let region_hero: UInt32 = 0b1 << 3      //4
     static let world: UInt32 = 0b1 << 4        //5
     static let enemy: UInt32 = 0b1 << 5         //6
-    static let enemy_detect: UInt32 = 0b1 << 6   //7
+    static let enemy_missle: UInt32 = 0b1 << 6   //7
 }
 
 enum action{
@@ -88,7 +88,7 @@ enum action{
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    
+    let label = SKLabelNode(fontNamed: "Chalkduster")
     let hero = SKSpriteNode(imageNamed: "ship_hero")
     //let enemy = SKSpriteNode(imageNamed: "ship_enemy")
     //let enemy_detect = SKSpriteNode(imageNamed: "enemy_detect")
@@ -130,7 +130,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var arrayRegion :[SKSpriteNode] = [SKSpriteNode]()
     
+    var arrayEnemy :[SKSpriteNode] = [SKSpriteNode]()
+    
+    var arrayMissle :[SKSpriteNode] = [SKSpriteNode]()
+    
     var framecount = 0
+    var missleCount = 0
+    var hitCount = 0
+    
     
     //var actionList = Array(repeating: 0.333, count: 3)
     
@@ -143,6 +150,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         background.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
         background.zPosition = -1
         addChild(background)
+        
+        label.fontSize = 40
+        label.fontColor = SKColor.blue
+        label.position = CGPoint(x: size.width/2, y: size.height*0.9)
+        label.zPosition = 1
+        label.text = String(hitCount)
+        addChild(label)
         
         //Initial position of hero
         hero.position = CGPoint(x: size.width * 0.1, y: size.height * 0.5)
@@ -200,7 +214,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         hero.physicsBody = SKPhysicsBody(circleOfRadius: hero.size.height/2)
         //hero.physicsBody?.isDynamic = true
         hero.physicsBody!.categoryBitMask = PhysicsCategory.hero
-        hero.physicsBody!.contactTestBitMask = PhysicsCategory.region_hero | PhysicsCategory.blade
+        hero.physicsBody!.contactTestBitMask = PhysicsCategory.All
         hero.physicsBody!.collisionBitMask = PhysicsCategory.world
         
         
@@ -220,8 +234,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func addEnemy() {
         
         let enemy = SKSpriteNode(imageNamed: "ship_enemy")
+        arrayEnemy.append(enemy)
         let actualY = random(min: enemy.size.height/2, max: size.height - enemy.size.height/2)
         enemy.position = CGPoint(x: size.width + enemy.size.width/2, y: actualY)
+        let v = CGVector(dx: enemy.position.x - hero.position.x, dy: enemy.position.y - hero.position.y)
+        let angle = atan2(v.dy, v.dx)
+        enemy.zRotation = angle + 1.57079633
+        
+        
+        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size)
+        //region_hero.physicsBody?.isDynamic = true
+        enemy.physicsBody!.categoryBitMask = PhysicsCategory.enemy
+        enemy.physicsBody!.contactTestBitMask = PhysicsCategory.All
+        enemy.physicsBody!.collisionBitMask = PhysicsCategory.None
         
         addChild(enemy)
         let actualDuration = random(min: CGFloat(1.0), max: CGFloat(3.0))
@@ -229,20 +254,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //let actionMove = SKAction.moveBy(x: 10, y: actualY - hero.position.y ,duration: TimeInterval(actualDuration))
         let actionMoveDone = SKAction.removeFromParent()
         enemy.run(SKAction.sequence([actionMove, actionMoveDone]))
-        
     }
     
-    
-    /*func gameAI(){
-        print ("here")
-        //let act = randomNumber(probabilities: actionList)
-        //if(act == 2){
-            archer_action()
-        //}
-    }*/
+    func shootMissle(_ enemy: SKSpriteNode){
+        let enemy_missle = SKSpriteNode(imageNamed: "enemy_missle")
+        enemy_missle.position = enemy.position
+        let v = CGVector(dx: enemy_missle.position.x - hero.position.x, dy: enemy_missle.position.y - hero.position.y)
+        let angle = atan2(v.dy, v.dx)
+        enemy_missle.zRotation = angle + 1.57079633
+        
+        enemy_missle.physicsBody!.categoryBitMask = PhysicsCategory.enemy
+        enemy_missle.physicsBody!.contactTestBitMask = PhysicsCategory.All
+        enemy_missle.physicsBody!.collisionBitMask = PhysicsCategory.None
+        
+        addChild(enemy_missle)
+        let actualDuration = random(min: CGFloat(1.0), max: CGFloat(2.0))
+        let actionMove = SKAction.move(to: CGPoint(x: hero.position.x , y: hero.position.y), duration: TimeInterval(actualDuration))
+        let actionMoveDone = SKAction.removeFromParent()
+        enemy_missle.run(SKAction.sequence([actionMove, actionMoveDone]))
+    }
     
     override func update(_ currentTime: TimeInterval) {
         framecount += 1
+        missleCount += 1
         if(moveActive){
             let v = CGVector(dx: move_stick.position.x - move_base.position.x, dy: move_stick.position.y - move_base.position.y)
             let angle = atan2(v.dy, v.dx)
@@ -285,22 +319,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
         }
         
-        /*if(enemyArcherActive){
-            enemyArcherCount += 1
-            archer_enemy.position = enemy.position
-            let v = CGVector(dx: hero.position.x - enemy.position.x, dy: hero.position.y - enemy.position.y)
-            let angle = atan2(v.dy, v.dx)
-            archer_enemy.zRotation = angle - 1.57079633
-            if(enemyArcherCount == enemyArcherRandom){
-                archer_enemy.removeFromParent()
-                enemyArcherCount = 0
-                enemyArcherActive = false
-                gameAI()
-            }
-        }*/
-        
         arrayArrow = arrayArrow.filter {$0.position.x < self.size.width && $0.position.x > 0 && $0.position.y > 0 && $0.position.y < self.size.height}
-        //print(arrayArrow.count)
+        arrayEnemy = arrayEnemy.filter {$0.position.x > 0 && $0.position.y > 0 && $0.position.y < self.size.height}
         if(framecount == 5){
             for i in 0..<arrayArrow.count{
                 let region_hero = SKSpriteNode(imageNamed: "region")
@@ -310,12 +330,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 region_hero.physicsBody = SKPhysicsBody(circleOfRadius: region_hero.size.width/2)
                 //region_hero.physicsBody?.isDynamic = true
                 region_hero.physicsBody!.categoryBitMask = PhysicsCategory.region_hero
-                region_hero.physicsBody!.contactTestBitMask = PhysicsCategory.blade | PhysicsCategory.hero
+                region_hero.physicsBody!.contactTestBitMask = PhysicsCategory.blade | PhysicsCategory.hero | PhysicsCategory.arrow | PhysicsCategory.enemy
                 region_hero.physicsBody!.collisionBitMask = PhysicsCategory.None
                 region_hero.physicsBody?.usesPreciseCollisionDetection = true
 
             }
+            
             framecount = 0
+        }
+        print(arrayEnemy.count)
+        if(missleCount == 40){
+            for i in 0..<arrayEnemy.count{
+                shootMissle(arrayEnemy[i])
+            }
+            missleCount = 0
         }
     }
     
@@ -355,17 +383,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    /*func archer_action(){
-        print("here2")
-        enemyArcherActive = true
-        addChild(archer_enemy)
-        enemyArcherRandom = randomInt(min: 10, max: 50)
-    }*/
-    
     
     func shootOut(){
         let arrow = SKSpriteNode(imageNamed: "archer")
         arrayArrow.append(arrow)
+        
+        arrow.physicsBody = SKPhysicsBody(rectangleOf: arrow.size)
+        //region_hero.physicsBody?.isDynamic = true
+        arrow.physicsBody!.categoryBitMask = PhysicsCategory.arrow
+        arrow.physicsBody!.contactTestBitMask = PhysicsCategory.hero | PhysicsCategory.enemy | PhysicsCategory.region_hero
+        arrow.physicsBody!.collisionBitMask = PhysicsCategory.None
+        arrow.physicsBody?.usesPreciseCollisionDetection = true
+
         
         arrow.position = hero.position
         addChild(arrow)
@@ -384,6 +413,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         region.removeFromParent()
     }
     
+    func arrowDidCollideWithEnemy(enemy: SKSpriteNode, arrow: SKSpriteNode){
+        hitCount+=1
+        label.text = String(hitCount)
+        enemy.position = CGPoint(x: -10, y: -10)
+        enemy.removeFromParent();
+    }
+    
     func didBegin(_ contact: SKPhysicsContact) {
         var firstBody: SKPhysicsBody
         var secondBody: SKPhysicsBody
@@ -394,10 +430,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             firstBody = contact.bodyB
             secondBody = contact.bodyA
         }
+        //print(firstBody.categoryBitMask, secondBody.categoryBitMask)
         if(firstBody.categoryBitMask == PhysicsCategory.blade && secondBody.categoryBitMask == PhysicsCategory.region_hero){
             if let blade = firstBody.node as? SKSpriteNode, let
                 region = secondBody.node as? SKSpriteNode {
                 bladeDidCollideWithRegion(blade: blade, region: region)
+            }
+        }
+        if(firstBody.categoryBitMask == PhysicsCategory.arrow && secondBody.categoryBitMask == PhysicsCategory.enemy){
+            if let arrow = firstBody.node as? SKSpriteNode, let
+                enemy = secondBody.node as? SKSpriteNode {
+                arrowDidCollideWithEnemy(enemy: enemy, arrow: arrow)
             }
         }
         
