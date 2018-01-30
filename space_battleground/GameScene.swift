@@ -89,6 +89,7 @@ enum action{
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let label = SKLabelNode(fontNamed: "Chalkduster")
+    let energy_label = SKLabelNode(fontNamed: "Chalkduster")
     let hero = SKSpriteNode(imageNamed: "ship_hero")
     //let enemy = SKSpriteNode(imageNamed: "ship_enemy")
     //let enemy_detect = SKSpriteNode(imageNamed: "enemy_detect")
@@ -116,13 +117,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var selectBladeNow:Bool = false
     
-    
-    //var enemyArcherActive:Bool = false
-    //var enemyBladeActive:Bool = false
-    
-    //var enemyArcherCount = 0
-    //var enemyArcherRandom: Int?
-    
     var validMove:UITouch?
     var validAtt:UITouch?
     
@@ -138,6 +132,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var missleCount = 0
     var hitCount = 0
     
+    var energy = 100
     
     //var actionList = Array(repeating: 0.333, count: 3)
     
@@ -153,30 +148,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         label.fontSize = 40
         label.fontColor = SKColor.blue
-        label.position = CGPoint(x: size.width/2, y: size.height*0.9)
+        label.position = CGPoint(x: size.width * 0.2, y: size.height*0.9)
         label.zPosition = 1
         label.text = String(hitCount)
         addChild(label)
+
+        energy_label.fontSize = 20
+        energy_label.fontColor = SKColor.blue
+        energy_label.position = CGPoint(x: size.width * 0.8, y: size.height*0.9)
+        energy_label.zPosition = 1
+        energy_label.text = "energy: " + String(energy)+"%"
+        addChild(energy_label)
+
         
         //Initial position of hero
         hero.position = CGPoint(x: size.width * 0.1, y: size.height * 0.5)
         
-        //enemy.position = CGPoint(x:size.width*0.9, y:size.height*0.5)
-        //enemy_detect.position = enemy.position
-        //enemy_detect.zPosition = -0.9
-        
-        //add to screen
         addChild(hero)
-        //addChild(enemy)
-        //addChild(enemy_detect)
-        
-        //gameAI()
         
         //movement stick initialization
         move_base.position = CGPoint(x: size.width * 0.1, y: size.height * 0.15)
+        move_base.zPosition = 1
         addChild(move_base)
         
         move_stick.position = move_base.position
+        move_stick.zPosition = 1
         addChild(move_stick)
         
         move_base.alpha = 0.6
@@ -184,18 +180,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
  
         //attack stick initialization
         att_base.position = CGPoint(x: size.width * 0.9, y: size.height * 0.15)
+        att_base.zPosition = 1
         addChild(att_base)
         
         att_stick.position = att_base.position
+        att_stick.zPosition = 1
         addChild(att_stick)
         
         //selection initialization
         
         select_base.position = CGPoint(x: size.width * 0.9, y: size.height * 0.85)
+        select_base.zPosition = 1
         addChild(select_base)
         
         archerSelect.position = select_base.position
+        archerSelect.zPosition = 1
         bladeSelect.position = select_base.position
+        bladeSelect.zPosition = 1
         addChild(archerSelect)
         
         
@@ -208,7 +209,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
         //self.physicsBody?.isDynamic = true
         self.physicsBody!.categoryBitMask = PhysicsCategory.world
-        self.physicsBody!.contactTestBitMask = PhysicsCategory.None
+        self.physicsBody!.contactTestBitMask = PhysicsCategory.hero
         self.physicsBody!.collisionBitMask = PhysicsCategory.hero
         
         hero.physicsBody = SKPhysicsBody(circleOfRadius: hero.size.height/2)
@@ -221,7 +222,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         run(SKAction.repeatForever(
             SKAction.sequence([
                 SKAction.run(addEnemy),
-                SKAction.wait(forDuration: 1.0)
+                SKAction.wait(forDuration: 3.0)
                 ])
         ))
         
@@ -249,7 +250,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemy.physicsBody!.collisionBitMask = PhysicsCategory.None
         
         addChild(enemy)
-        let actualDuration = random(min: CGFloat(1.0), max: CGFloat(3.0))
+        let actualDuration = random(min: CGFloat(3.0), max: CGFloat(5.0))
         let actionMove = SKAction.move(to: CGPoint(x: -enemy.size.width/2, y: hero.position.y), duration: TimeInterval(actualDuration))
         //let actionMove = SKAction.moveBy(x: 10, y: actualY - hero.position.y ,duration: TimeInterval(actualDuration))
         let actionMoveDone = SKAction.removeFromParent()
@@ -263,12 +264,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let angle = atan2(v.dy, v.dx)
         enemy_missle.zRotation = angle + 1.57079633
         
-        enemy_missle.physicsBody!.categoryBitMask = PhysicsCategory.enemy
+        enemy_missle.physicsBody = SKPhysicsBody(rectangleOf: enemy_missle.size)
+        enemy_missle.physicsBody!.categoryBitMask = PhysicsCategory.enemy_missle
         enemy_missle.physicsBody!.contactTestBitMask = PhysicsCategory.All
         enemy_missle.physicsBody!.collisionBitMask = PhysicsCategory.None
         
         addChild(enemy_missle)
-        let actualDuration = random(min: CGFloat(1.0), max: CGFloat(2.0))
+        let actualDuration = random(min: CGFloat(2.0), max: CGFloat(4.0))
         let actionMove = SKAction.move(to: CGPoint(x: hero.position.x , y: hero.position.y), duration: TimeInterval(actualDuration))
         let actionMoveDone = SKAction.removeFromParent()
         enemy_missle.run(SKAction.sequence([actionMove, actionMoveDone]))
@@ -330,20 +332,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 region_hero.physicsBody = SKPhysicsBody(circleOfRadius: region_hero.size.width/2)
                 //region_hero.physicsBody?.isDynamic = true
                 region_hero.physicsBody!.categoryBitMask = PhysicsCategory.region_hero
-                region_hero.physicsBody!.contactTestBitMask = PhysicsCategory.blade | PhysicsCategory.hero | PhysicsCategory.arrow | PhysicsCategory.enemy
+                region_hero.physicsBody!.contactTestBitMask = PhysicsCategory.All
                 region_hero.physicsBody!.collisionBitMask = PhysicsCategory.None
                 region_hero.physicsBody?.usesPreciseCollisionDetection = true
-
             }
             
             framecount = 0
         }
-        print(arrayEnemy.count)
-        if(missleCount == 40){
+        //print(arrayEnemy.count)
+        if(missleCount == 80){
             for i in 0..<arrayEnemy.count{
                 shootMissle(arrayEnemy[i])
             }
             missleCount = 0
+            hitCount += 1
+            label.text = String(hitCount)
         }
     }
     
@@ -385,39 +388,65 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func shootOut(){
-        let arrow = SKSpriteNode(imageNamed: "archer")
-        arrayArrow.append(arrow)
-        
-        arrow.physicsBody = SKPhysicsBody(rectangleOf: arrow.size)
-        //region_hero.physicsBody?.isDynamic = true
-        arrow.physicsBody!.categoryBitMask = PhysicsCategory.arrow
-        arrow.physicsBody!.contactTestBitMask = PhysicsCategory.hero | PhysicsCategory.enemy | PhysicsCategory.region_hero
-        arrow.physicsBody!.collisionBitMask = PhysicsCategory.None
-        arrow.physicsBody?.usesPreciseCollisionDetection = true
+        if(energy == 0){
+            run(SKAction.playSoundFileNamed("alarm.mp3", waitForCompletion: false))
+        }else{
+            let arrow = SKSpriteNode(imageNamed: "archer")
+            arrayArrow.append(arrow)
+            energy -= 10
+            energy_label.text = "energy: " + String(energy) + "%"
+            arrow.physicsBody = SKPhysicsBody(rectangleOf: arrow.size)
+            //region_hero.physicsBody?.isDynamic = true
+            arrow.physicsBody!.categoryBitMask = PhysicsCategory.arrow
+            arrow.physicsBody!.contactTestBitMask = PhysicsCategory.All
+            arrow.physicsBody!.collisionBitMask = PhysicsCategory.None
+            arrow.physicsBody?.usesPreciseCollisionDetection = true
 
         
-        arrow.position = hero.position
-        addChild(arrow)
-        let v = CGVector(dx: att_stick.position.x - att_base.position.x, dy: att_stick.position.y - att_base.position.y)
-        let angle = atan2(v.dy, v.dx)
-        arrow.zRotation = angle - 1.57079633
-        let offset = att_stick.position - att_base.position
-        let direction = offset.normalized()
-        let dest = direction * 1000 + arrow.position
-        let shootMove = SKAction.move(to: dest, duration: 1.0)
-        let shootMoveDone = SKAction.removeFromParent()
-        arrow.run(SKAction.sequence([shootMove, shootMoveDone]))
+            arrow.position = hero.position
+            run(SKAction.playSoundFileNamed("Laser.wav", waitForCompletion: false))
+            addChild(arrow)
+            let v = CGVector(dx: att_stick.position.x - att_base.position.x, dy: att_stick.position.y - att_base.position.y)
+            let angle = atan2(v.dy, v.dx)
+            arrow.zRotation = angle - 1.57079633
+            let offset = att_stick.position - att_base.position
+            let direction = offset.normalized()
+            let dest = direction * 1000 + arrow.position
+            let shootMove = SKAction.move(to: dest, duration: 1.0)
+            let shootMoveDone = SKAction.removeFromParent()
+            arrow.run(SKAction.sequence([shootMove, shootMoveDone]))
+        }
     }
     
     func bladeDidCollideWithRegion(blade: SKSpriteNode, region: SKSpriteNode){
+        hitCount += 1
+        if(energy <= 100){
+            energy += 2
+        }
+        if(energy >= 100){
+            energy = 100
+        }
+        energy_label.text = "energy: "+String(energy)+"%"
         region.removeFromParent()
     }
     
     func arrowDidCollideWithEnemy(enemy: SKSpriteNode, arrow: SKSpriteNode){
-        hitCount+=1
+        hitCount+=100
         label.text = String(hitCount)
         enemy.position = CGPoint(x: -10, y: -10)
+        run(SKAction.playSoundFileNamed("Explosion.wav", waitForCompletion: false))
         enemy.removeFromParent();
+    }
+    
+    func heroWillDie(hero: SKSpriteNode, enemy: SKSpriteNode){
+        let loseAction = SKAction.run() {
+            let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+            let text = "Score: " + String(self.hitCount)
+            let gameOverScene = GameOverScene(size: self.size, text: text)
+            self.view?.presentScene(gameOverScene, transition: reveal)
+        }
+        run(SKAction.playSoundFileNamed("Explosion.wav", waitForCompletion: false))
+        run(loseAction)
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
@@ -430,19 +459,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             firstBody = contact.bodyB
             secondBody = contact.bodyA
         }
-        //print(firstBody.categoryBitMask, secondBody.categoryBitMask)
+        print(firstBody.categoryBitMask, secondBody.categoryBitMask)
         if(firstBody.categoryBitMask == PhysicsCategory.blade && secondBody.categoryBitMask == PhysicsCategory.region_hero){
             if let blade = firstBody.node as? SKSpriteNode, let
                 region = secondBody.node as? SKSpriteNode {
                 bladeDidCollideWithRegion(blade: blade, region: region)
             }
         }
-        if(firstBody.categoryBitMask == PhysicsCategory.arrow && secondBody.categoryBitMask == PhysicsCategory.enemy){
+        if((firstBody.categoryBitMask == PhysicsCategory.arrow || firstBody.categoryBitMask == PhysicsCategory.blade) && secondBody.categoryBitMask == PhysicsCategory.enemy){
             if let arrow = firstBody.node as? SKSpriteNode, let
                 enemy = secondBody.node as? SKSpriteNode {
                 arrowDidCollideWithEnemy(enemy: enemy, arrow: arrow)
             }
         }
+        
+        if(firstBody.categoryBitMask == PhysicsCategory.hero && (secondBody.categoryBitMask == PhysicsCategory.enemy || secondBody.categoryBitMask == PhysicsCategory.enemy_missle)){
+            if let hero = firstBody.node as? SKSpriteNode, let
+                enemy = secondBody.node as? SKSpriteNode {
+                heroWillDie(hero: hero, enemy: enemy)
+            }
+        }
+
         
     }
     
@@ -466,7 +503,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     blade.physicsBody = SKPhysicsBody(rectangleOf: blade.size)
                     //blade.physicsBody?.isDynamic = true
                     blade.physicsBody!.categoryBitMask = PhysicsCategory.blade
-                    blade.physicsBody!.contactTestBitMask = PhysicsCategory.region_hero | PhysicsCategory.hero
+                    blade.physicsBody!.contactTestBitMask = PhysicsCategory.All
                     blade.physicsBody!.collisionBitMask = PhysicsCategory.None
                 }else{
                     archer.position = hero.position
